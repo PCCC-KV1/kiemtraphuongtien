@@ -2,6 +2,8 @@
 // và đăng ký service worker để ứng dụng mở được khi mất mạng.
 // Trang gốc (Apps Script) không dùng file này. Chỉ bản cài trên điện thoại dùng.
 (function () {
+  // sw.js nằm ở gốc site, cách file này một cấp (assets/). Tính theo vị trí file để chạy được ở thư mục con.
+  var SW_URL = document.currentScript ? new URL("sw.js", document.currentScript.src).href : "sw.js";
   var EXEC = window.PCCC_EXEC || "";
   var TIMEOUT_MS = 15000;
   var seq = 0;
@@ -72,7 +74,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/sw.js").catch(function () {});
+      navigator.serviceWorker.register(SW_URL).catch(function () {});
     });
   }
 })();
