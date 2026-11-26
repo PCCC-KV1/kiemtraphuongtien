@@ -558,6 +558,8 @@ h1 {
 }
 .icon-btn .ico { width: 20px; height: 20px; }
 .icon-btn.round { min-width: 44px; padding: 0; border-radius: 50%; }
+/* Trên Safari (iPhone), backdrop-filter làm mờ chữ và icon của nút trong màn mở đầu. Bỏ hiệu ứng mờ ở đây. */
+.intro .icon-btn { background: rgba(255, 255, 255, .08); backdrop-filter: none; -webkit-backdrop-filter: none; }
 .burst { position: fixed; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; }
 .conf {
   position: absolute; top: -14px; width: 8px; height: 12px; border-radius: 2px;
@@ -804,6 +806,65 @@ body.scrolled .topbar { transform: none; }
 .unit { margin-top: 22px; font-size: 15px; font-weight: 600; letter-spacing: .01em; color: var(--ink); overflow-wrap: anywhere; }
 .unit:empty { display: none; }
 .unit + .eyebrow { margin-top: 8px; }
+
+/* Quản trị: mở khoá tên của một người ngay trên máy của admin */
+.admin-foot { display: flex; justify-content: center; margin-top: 22px; }
+.admin-link {
+  min-height: 44px; padding: 0 16px; border: 0; background: none; cursor: pointer;
+  color: var(--muted); font-size: 14px; font-weight: 600;
+  text-decoration: underline; text-underline-offset: 4px;
+}
+.admin { position: fixed; inset: 0; z-index: 95; display: flex; align-items: flex-end; justify-content: center; background: rgba(2, 4, 8, .74); }
+.admin[hidden] { display: none; }
+.admin [hidden] { display: none !important; }
+.admin-sheet {
+  width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+  border-radius: 24px 24px 0 0; border: 1px solid var(--line-2); border-bottom: 0;
+  background: #0C131D; color: var(--ink); box-shadow: 0 -24px 60px -20px #000;
+}
+@media (min-width: 560px) {
+  .admin { align-items: center; }
+  .admin-sheet { border-radius: 24px; border-bottom: 1px solid var(--line-2); }
+}
+.admin-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.admin-head h2 { margin: 0; font-size: 20px; font-weight: 800; }
+.admin-sub { margin: 6px 0 16px; font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.admin-label { display: block; margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.admin-input {
+  display: block; width: 100%; min-height: 48px; margin: 0 0 12px; padding: 0 14px;
+  font-size: 16px; color: var(--ink); background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--line-2); border-radius: 14px; outline: none;
+}
+.admin-input:focus { border-color: var(--amber); }
+.btn-admin {
+  display: block; width: 100%; min-height: 48px; border: 0; border-radius: 14px; cursor: pointer;
+  font-size: 16px; font-weight: 800; color: #140803;
+  background: linear-gradient(135deg, var(--amber), var(--ember) 55%, var(--ember-2));
+}
+.btn-admin:disabled { opacity: .5; cursor: default; }
+.admin-err { margin: 10px 0 0; font-size: 14px; font-weight: 700; color: #FFB8C4; overflow-wrap: anywhere; }
+.admin-err:empty { display: none; }
+.admin-note { margin: 0 0 12px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.admin-list { display: grid; gap: 10px; }
+.admin-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 16px; background: rgba(255, 255, 255, .03);
+}
+.admin-info { min-width: 0; display: grid; gap: 2px; }
+.admin-info strong { font-size: 15px; overflow-wrap: anywhere; }
+.admin-info span { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.admin-unlock {
+  flex: 0 0 auto; min-height: 44px; padding: 0 14px; border-radius: 12px; cursor: pointer;
+  font-size: 14px; font-weight: 800; white-space: nowrap; color: var(--ink);
+  background: rgba(255, 255, 255, .08); border: 1px solid var(--line-2);
+}
+.admin-unlock.armed { color: #FFB8C4; background: var(--bad-soft); border-color: rgba(255, 77, 109, .6); }
+.admin-unlock:disabled { opacity: .45; cursor: default; }
+.admin-logout {
+  display: block; width: 100%; min-height: 44px; margin-top: 16px; border: 0; background: none; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: var(--muted); text-decoration: underline; text-underline-offset: 4px;
+}
 </style>
 <link rel="manifest" href="bks-15a-007-04.json">
 <link rel="icon" href="icon-192.png">
@@ -1136,7 +1197,36 @@ body.scrolled .topbar { transform: none; }
   <div class="result" id="result" role="status" hidden></div>
 
   <footer class="foot">Dữ liệu được lưu trực tiếp vào Google Sheet</footer>
+
+<footer class="admin-foot">
+  <button class="admin-link" id="adminOpen" type="button">Quản trị</button>
+</footer>
 </main>
+
+<div class="admin" id="adminPanel" hidden>
+  <div class="admin-sheet" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <div class="admin-head">
+      <h2 id="adminTitle">Quản trị</h2>
+      <button class="icon-btn round" id="adminClose" type="button" aria-label="Đóng">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="admin-sub" id="adminSub"></p>
+
+    <form class="admin-login" id="adminLogin" autocomplete="off" hidden>
+      <label class="admin-label" for="adminPass">Mật khẩu quản trị</label>
+      <input class="admin-input" id="adminPass" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="btn-admin" id="adminEnter" type="submit">Vào</button>
+      <p class="admin-err" id="adminErr" role="alert"></p>
+    </form>
+
+    <div class="admin-body" id="adminBody" hidden>
+      <p class="admin-note">Mở khoá để người đó nhập lại tên hôm nay. Chỉ xoá tên và mã máy hôm nay của người được chọn, các người khác giữ nguyên.</p>
+      <div class="admin-list" id="adminList"></div>
+      <button class="admin-logout" id="adminLogout" type="button">Thoát quản trị</button>
+    </div>
+  </div>
+</div>
 
 <div class="dock" id="dock">
   <div class="dock-inner">
@@ -2448,6 +2538,169 @@ function initSpin() {
   requestAnimationFrame(spinFrame);
 }
 
+// ===== Quản trị: mở khoá tên của một người ngay trên máy của admin =====
+// Mật khẩu chỉ giữ trong phiên trình duyệt này (sessionStorage). Bấm "Thoát quản trị" để xoá.
+// Máy chủ tự khóa 10 phút sau 5 lần nhập sai.
+const ADMIN_KEY = "pccc_admin_pass";
+let adminPass = "";
+let adminBusy = false;
+let adminDisarmTimer = null;   // hẹn giờ tự bỏ trạng thái "chờ xác nhận" của nút mở khoá
+
+function adminLoadPass() {
+  if (adminPass) return adminPass;
+  try { adminPass = sessionStorage.getItem(ADMIN_KEY) || ""; } catch (err) {}
+  return adminPass;
+}
+
+function adminSavePass(p) {
+  adminPass = p;
+  try {
+    if (p) sessionStorage.setItem(ADMIN_KEY, p);
+    else sessionStorage.removeItem(ADMIN_KEY);
+  } catch (err) {}
+}
+
+function adminShowLogin(msg) {
+  $("adminLogin").hidden = false;
+  $("adminBody").hidden = true;
+  $("adminPass").value = "";
+  $("adminErr").textContent = msg || "";
+}
+
+function adminShowBody() {
+  $("adminLogin").hidden = true;
+  $("adminBody").hidden = false;
+  $("adminErr").textContent = "";
+  renderAdminList();
+}
+
+function adminShowPanel() {
+  $("adminSub").textContent = "Xe " + PLATE;
+  $("adminPanel").hidden = false;
+  if (adminLoadPass()) adminShowBody();
+  else adminShowLogin("");
+}
+
+function adminHidePanel() {
+  adminClearArm();
+  $("adminPanel").hidden = true;
+}
+
+function adminLogin(e) {
+  if (e) e.preventDefault();
+  if (adminBusy) return;
+  const pass = $("adminPass").value;
+  if (!pass) {
+    $("adminErr").textContent = "Nhập mật khẩu quản trị.";
+    return;
+  }
+  adminBusy = true;
+  $("adminEnter").disabled = true;
+  google.script.run
+    .withSuccessHandler(function () {
+      adminBusy = false;
+      $("adminEnter").disabled = false;
+      adminSavePass(pass);
+      adminShowBody();
+    })
+    .withFailureHandler(function (err) {
+      adminBusy = false;
+      $("adminEnter").disabled = false;
+      $("adminErr").textContent = errText(err);
+    })
+    .adminDangNhap(pass);
+}
+
+// Bỏ trạng thái "chờ xác nhận" của mọi nút mở khoá
+function adminClearArm() {
+  if (adminDisarmTimer) {
+    clearTimeout(adminDisarmTimer);
+    adminDisarmTimer = null;
+  }
+  document.querySelectorAll(".admin-unlock.armed").forEach(function (b) {
+    b.classList.remove("armed");
+    b.dataset.armed = "";
+    b.textContent = "Mở khoá";
+  });
+}
+
+// Danh sách 4 người: ai đã có tên thì mở khoá được. Dữ liệu lấy từ rosterState (đã đồng bộ định kỳ).
+function renderAdminList() {
+  const box = $("adminList");
+  box.textContent = "";
+  ASSIGNMENT.forEach(function (a) {
+    const name = rosterState[a.nguoi] || "";
+    const row = el("div", "admin-row");
+    const info = el("div", "admin-info");
+    info.appendChild(el("strong", "", name || (a.nguoi + " · chưa có tên")));
+    info.appendChild(el("span", "", a.nguoi + " · " + a.viTri.join(", ")));
+    row.appendChild(info);
+    const btn = el("button", "admin-unlock", "Mở khoá");
+    btn.type = "button";
+    btn.disabled = !name || adminBusy;
+    btn.addEventListener("click", function () { adminUnlockTap(a.nguoi, btn); });
+    row.appendChild(btn);
+    box.appendChild(row);
+  });
+}
+
+// Chạm lần 1 để chờ xác nhận, chạm lần 2 trong 4 giây mới mở khoá (không dùng hộp thoại của trình duyệt)
+function adminUnlockTap(nguoi, btn) {
+  if (adminBusy) return;
+  if (btn.dataset.armed !== "1") {
+    adminClearArm();
+    btn.dataset.armed = "1";
+    btn.textContent = "Chạm lại để mở khoá";
+    btn.classList.add("armed");
+    adminDisarmTimer = setTimeout(adminClearArm, 4000);
+    buzz(6);
+    return;
+  }
+  adminClearArm();
+  adminBusy = true;
+  btn.disabled = true;
+  btn.textContent = "Đang mở...";
+  google.script.run
+    .withSuccessHandler(function (res) {
+      adminBusy = false;
+      // Cập nhật ngay trên màn hình, rồi tải lại để đồng bộ với máy chủ
+      rosterState[nguoi] = "";
+      renderRow(nguoi);
+      update();
+      renderAdminList();
+      const cu = res && res.tenDaXoa ? " (" + res.tenDaXoa + ")" : "";
+      showStatus("Đã mở khoá " + nguoi + cu + ". Người đó nhập lại tên.");
+      refresh();
+    })
+    .withFailureHandler(function (err) {
+      adminBusy = false;
+      const msg = errText(err);
+      if (msg.indexOf("Sai mật khẩu") === 0 || msg.indexOf("quá nhiều lần") !== -1) {
+        adminSavePass("");
+        adminShowLogin(msg);
+      } else {
+        showStatus(msg, true);
+        renderAdminList();
+      }
+    })
+    .adminMoKhoaTen(PLATE, nguoi, adminLoadPass());
+}
+
+function initAdmin() {
+  $("adminOpen").addEventListener("click", adminShowPanel);
+  $("adminClose").addEventListener("click", adminHidePanel);
+  $("adminLogin").addEventListener("submit", adminLogin);
+  $("adminLogout").addEventListener("click", function () {
+    adminSavePass("");
+    adminClearArm();
+    adminShowLogin("Đã thoát quản trị.");
+  });
+  // Chạm vùng nền tối bên ngoài thì đóng
+  $("adminPanel").addEventListener("click", function (e) {
+    if (e.target === this) adminHidePanel();
+  });
+}
+
 // Khởi động
 $("unitTitle").textContent = TIEU_DE;
 $("plateTitle").textContent = PLATE;
@@ -2468,6 +2721,7 @@ refresh();
 setInterval(refresh, 4000);
 initIntro();
 initUi();
+initAdmin();
 </script>
 
 </body>

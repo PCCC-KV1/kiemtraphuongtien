@@ -1,4 +1,4 @@
-const CACHE = "pccc-mwx3ur3h";
+const CACHE = "pccc-mwxhy3qk";
 const SHELL = ["./","shim.js","config.js","icon-192.png","icon-512.png","apple-touch-icon.png","bks-15cd-000-04.html","bks-15cd-000-04.json","bks-15a-006-81.html","bks-15a-006-81.json","bks-15a-007-04.html","bks-15a-007-04.json"];
 
 self.addEventListener("install", (e) => {

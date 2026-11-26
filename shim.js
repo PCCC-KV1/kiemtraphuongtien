@@ -66,6 +66,12 @@
       },
       confirmCheck: function (plate, nguoi, token) {
         call("confirmCheck", { plate: plate, nguoi: nguoi, token: token }, ok, fail);
+      },
+      adminDangNhap: function (matKhau) {
+        call("adminDangNhap", { pass: matKhau }, ok, fail);
+      },
+      adminMoKhoaTen: function (plate, nguoi, matKhau) {
+        call("adminMoKhoaTen", { plate: plate, nguoi: nguoi, pass: matKhau }, ok, fail);
       }
     };
   }
